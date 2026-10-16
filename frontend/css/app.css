@@ -195,3 +195,15 @@ main { max-width: 760px; margin: 0 auto; padding: 16px 16px 96px; }
   .cabecera, .barra-recorrido { margin-left: -96px; padding-left: 112px; }
   #toast { bottom: 24px; }
 }
+
+/* ---------- Administración ---------- */
+main.admin { max-width: 980px; padding-bottom: 40px; }
+.segmentos { display: flex; gap: 4px; background: var(--hielo-2); padding: 4px; border-radius: 12px; margin-bottom: 14px; }
+.segmentos button { flex: 1; border: 0; background: none; padding: 10px 8px; border-radius: 9px; font-weight: 600; color: var(--suave); cursor: pointer; min-height: 44px; }
+.segmentos button.activo { background: var(--blanco); color: var(--azul); box-shadow: var(--sombra); }
+.tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.lista > li.elegida { background: var(--hielo); box-shadow: inset 3px 0 0 var(--acento); padding-left: 10px; }
+.grilla-filtros { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+@media (max-width: 760px) { .grilla-filtros { grid-template-columns: 1fr 1fr; } .grilla-filtros > :first-child { grid-column: 1 / -1; } }
+.barra-accion { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 12px; background: var(--hielo); border-radius: 10px; margin-bottom: 10px; }
+.barra-accion select { min-height: 38px; padding: 6px 8px; }

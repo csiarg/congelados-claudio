@@ -27,6 +27,12 @@
     $('[data-ir="vender"]').hidden = true;
   }
 
+  if (E.perfil.rol === 'admin') {
+    const a = document.createElement('a');
+    a.href = 'admin.html'; a.className = 'btn-salir'; a.textContent = 'Admin'; a.style.textDecoration = 'none';
+    $('#btn-salir').before(a);
+  }
+
   $('#btn-salir').addEventListener('click', async () => {
     await sb.auth.signOut();
     location.replace('index.html');

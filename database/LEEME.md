@@ -24,6 +24,9 @@ Antes de cargar los datos reales: ejecutar `99_limpiar_datos.sql` (borra todo me
 | `04_seguridad.sql` | Permisos por rol | Sí |
 | `05_datos_demo.sql` | Datos de prueba | Una vez |
 | `06_numeracion_correlativa.sql` | Pedidos, pagos y devoluciones sin saltos de número. **Si instalaste antes del 16/10, ejecutalo una vez** | Sí |
+| `07_importar_precios.sql` | Importar precios desde planilla (pantalla Administración). **Ejecutar una vez** | Sí |
+| `10_alta_clientes_inicial.sql` | Alta de los 86 clientes de las planillas | Sí (no duplica) |
+| `11_productos_lista2.sql` | Alta de los 82 productos de la Lista 2 | Sí (actualiza) |
 | `99_limpiar_datos.sql` | Borra datos (no usuarios) | ⚠️ |
 | `pruebas/` | Pruebas automáticas en Postgres local. **No van en Supabase** | — |
 
