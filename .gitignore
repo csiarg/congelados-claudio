@@ -1,0 +1,13 @@
+# Claves y credenciales: NUNCA al repo
+.env
+.env.*
+!.env.example
+*CUENTA*
+*.key
+# Sistema / editores
+node_modules/
+.netlify/
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/

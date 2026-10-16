@@ -1,0 +1,17 @@
+# Netlify · Congelados Claudio
+[build]
+  publish   = "frontend"            # carpeta que se publica como sitio web
+  functions = "netlify/functions"   # funciones de servidor (WhatsApp, más adelante)
+  command   = ""                    # sin compilación: HTML + JS directo
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
