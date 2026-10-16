@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f2a43">
+<title>Congelados Claudio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="app">
+
+<header class="cabecera">
+  <div>
+    <div class="marca"><span class="copo" aria-hidden="true">❄️</span><h1>Congelados Claudio</h1></div>
+    <div class="usuario" id="usuario"></div>
+  </div>
+  <div class="fila">
+    <select id="sel-camion" aria-label="Camión con el que trabajás"></select>
+    <button class="btn-salir" id="btn-salir">Salir</button>
+  </div>
+</header>
+<div class="barra-recorrido" id="barra-recorrido" hidden></div>
+
+<main>
+  <div id="aviso-consulta" class="aviso-caja info" hidden>Tu usuario es de <b>solo consulta</b>: podés ver todo pero no cargar operaciones.</div>
+
+  <!-- ====================== VENDER ====================== -->
+  <section id="tab-vender" data-tab>
+    <div class="tarjeta">
+      <h2>Cliente</h2>
+      <div class="buscador" id="venta-buscar-cliente-caja">
+        <input id="venta-buscar-cliente" placeholder="Buscar por nombre o nº de cliente…" autocomplete="off">
+        <div class="resultados" id="venta-clientes-res" hidden></div>
+      </div>
+      <div id="venta-cliente" class="cliente-elegido" hidden></div>
+    </div>
+
+    <div class="tarjeta" id="venta-productos-caja" hidden>
+      <h2 style="margin-bottom:10px">Productos</h2>
+      <div class="campo">
+        <select id="venta-origen" aria-label="De dónde sale la mercadería">
+          <option value="camion">Del camión (entrega ahora)</option>
+          <option value="deposito">Del depósito (pedido para entregar)</option>
+        </select>
+      </div>
+      <div class="buscador">
+        <input id="venta-buscar-prod" placeholder="Buscar producto o código…" autocomplete="off">
+        <div class="resultados" id="venta-prod-res" hidden></div>
+      </div>
+      <ul class="lista" id="venta-carrito" style="margin-top:6px"></ul>
+      <p class="vacio" id="venta-carrito-vacio">Todavía no agregaste productos.</p>
+    </div>
+
+    <div class="tarjeta" id="venta-cierre" hidden>
+      <div class="fila entre"><span>Total</span><span class="total-grande" id="venta-total">$ 0,00</span></div>
+      <div class="grilla-2" style="margin-top:12px">
+        <div class="campo">
+          <label for="venta-pago">Cobra ahora</label>
+          <input id="venta-pago" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0">
+        </div>
+        <div class="campo">
+          <label for="venta-medio">Medio</label>
+          <select id="venta-medio">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="mercadopago">Mercado Pago</option>
+            <option value="cheque">Cheque</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="venta-notas">Notas (opcional)</label>
+        <input id="venta-notas" placeholder="Ej.: entregar después de las 15">
+      </div>
+      <p class="suave" id="venta-saldo-final"></p>
+      <button class="btn ok ancho" id="btn-confirmar-venta">Confirmar venta</button>
+    </div>
+  </section>
+
+  <!-- ====================== CAMIÓN ====================== -->
+  <section id="tab-camion" data-tab hidden>
+    <div class="tarjeta">
+      <div class="fila entre" style="margin-bottom:12px">
+        <h2 id="camion-titulo">Stock en el camión</h2>
+        <button class="btn sec chico" id="btn-refrescar-camion">↻ Actualizar</button>
+      </div>
+      <table>
+        <thead><tr><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+        <tbody id="camion-stock"></tbody>
+      </table>
+      <p class="vacio" id="camion-vacio" hidden>El camión está vacío.</p>
+    </div>
+
+    <div class="tarjeta solo-operar">
+      <h2>Cargar desde el depósito</h2>
+      <div class="buscador">
+        <input id="carga-buscar" placeholder="Buscar producto…" autocomplete="off">
+        <div class="resultados" id="carga-res" hidden></div>
+      </div>
+      <ul class="lista" id="carga-lista" style="margin-top:6px"></ul>
+      <button class="btn ancho" id="btn-cargar" hidden style="margin-top:10px">Cargar al camión</button>
+    </div>
+
+    <div class="tarjeta solo-operar">
+      <h2>Fin del día</h2>
+      <p class="suave">Cierra el recorrido: lo que quedó en el camión vuelve al depósito y se genera el resumen del día.</p>
+      <button class="btn peligro ancho" id="btn-cerrar-recorrido">Cerrar recorrido y descargar</button>
+    </div>
+  </section>
+
+  <!-- ====================== COBRAR ====================== -->
+  <section id="tab-cobrar" data-tab hidden>
+    <div class="tarjeta">
+      <h2>Cliente</h2>
+      <div class="buscador">
+        <input id="cobro-buscar-cliente" placeholder="Buscar por nombre o nº de cliente…" autocomplete="off">
+        <div class="resultados" id="cobro-clientes-res" hidden></div>
+      </div>
+      <div id="cobro-cliente" class="cliente-elegido" hidden></div>
+    </div>
+    <div class="tarjeta solo-operar" id="cobro-form" hidden>
+      <h2>Registrar pago</h2>
+      <div class="grilla-2">
+        <div class="campo">
+          <label for="cobro-monto">Monto</label>
+          <input id="cobro-monto" type="number" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <div class="campo">
+          <label for="cobro-medio">Medio</label>
+          <select id="cobro-medio">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="mercadopago">Mercado Pago</option>
+            <option value="cheque">Cheque</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="cobro-ref">Referencia (opcional)</label>
+        <input id="cobro-ref" placeholder="Nº de transferencia, cheque…">
+      </div>
+      <button class="btn ok ancho" id="btn-cobrar">Registrar pago</button>
+    </div>
+    <div class="tarjeta" id="cobro-movs-caja" hidden>
+      <h2>Últimos movimientos</h2>
+      <table>
+        <thead><tr><th>Detalle</th><th class="num">Importe</th><th class="num">Saldo</th></tr></thead>
+        <tbody id="cobro-movs"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ====================== PEDIDOS ====================== -->
+  <section id="tab-pedidos" data-tab hidden>
+    <div class="tarjeta">
+      <div class="fila entre envolver" style="margin-bottom:12px">
+        <h2>Pedidos</h2>
+        <select id="pedidos-filtro" style="width:auto">
+          <option value="pendientes">Pendientes de entrega (mi camión)</option>
+          <option value="pendientes_todos">Pendientes (todos)</option>
+          <option value="hoy">Hoy</option>
+          <option value="semana">Últimos 7 días</option>
+        </select>
+      </div>
+      <ul class="lista" id="pedidos-lista"></ul>
+    </div>
+  </section>
+
+  <!-- ====================== CLIENTES ====================== -->
+  <section id="tab-clientes" data-tab hidden>
+    <div class="tarjeta">
+      <div class="fila entre" style="margin-bottom:12px">
+        <h2>Clientes</h2>
+        <button class="btn chico solo-operar" id="btn-nuevo-cliente">+ Nuevo</button>
+      </div>
+      <input id="clientes-buscar" placeholder="Buscar…" autocomplete="off" style="margin-bottom:8px">
+      <label class="suave fila" style="gap:6px;margin-bottom:6px"><input type="checkbox" id="clientes-deudores" style="width:auto;min-height:0"> Solo con deuda</label>
+      <ul class="lista" id="clientes-lista"></ul>
+    </div>
+  </section>
+</main>
+
+<nav class="nav-inferior" aria-label="Secciones">
+  <button data-ir="vender" class="activo"><span class="ico" aria-hidden="true">🛒</span>Vender</button>
+  <button data-ir="camion"><span class="ico" aria-hidden="true">🚚</span>Camión</button>
+  <button data-ir="cobrar"><span class="ico" aria-hidden="true">💵</span>Cobrar</button>
+  <button data-ir="pedidos"><span class="ico" aria-hidden="true">📋</span>Pedidos</button>
+  <button data-ir="clientes"><span class="ico" aria-hidden="true">👥</span>Clientes</button>
+</nav>
+
+<!-- Diálogo genérico -->
+<dialog id="dlg">
+  <div class="dlg-cab"><h3 id="dlg-titulo"></h3><button class="btn-icono" data-cerrar aria-label="Cerrar">✕</button></div>
+  <div class="dlg-cuerpo" id="dlg-cuerpo"></div>
+  <div class="dlg-pie" id="dlg-pie"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

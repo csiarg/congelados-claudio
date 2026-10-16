@@ -2,43 +2,113 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Congelados Claudio</title>
-<style>
-  :root { --bg:#f3f6f9; --card:#fff; --tx:#16202b; --mut:#5d6b7a; --ok:#1a7f4b; --err:#b42318; --acc:#0b5cab; }
-  * { box-sizing: border-box; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg);
-         font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--tx); padding:16px; }
-  .card { background:var(--card); border-radius:14px; padding:32px; max-width:420px; width:100%;
-          box-shadow:0 2px 20px rgba(0,0,0,.06); text-align:center; }
-  h1 { margin:0 0 4px; font-size:1.5rem; color:var(--acc); }
-  p { margin:0; color:var(--mut); }
-  #estado { margin-top:24px; padding:12px; border-radius:10px; background:var(--bg); font-weight:600; }
-  .ok { color:var(--ok); } .err { color:var(--err); }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f2a43">
+<title>Ingresar · Congelados Claudio</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <main class="card">
-    <h1>❄️ Congelados Claudio</h1>
-    <p>Sistema de gestión · en construcción</p>
-    <div id="estado">Verificando conexión con la base…</div>
+<div class="login-fondo">
+  <main class="login-caja" style="padding-bottom:28px">
+    <div class="marca"><span class="copo" aria-hidden="true">❄️</span><h1>Congelados Claudio</h1></div>
+    <p class="suave">Sistema de ventas y stock</p>
+
+    <div id="mensaje" class="aviso-caja" hidden></div>
+
+    <!-- Ingreso -->
+    <form id="form-login" autocomplete="on">
+      <div class="campo">
+        <label for="email">Mail</label>
+        <input id="email" type="email" autocomplete="username" required inputmode="email">
+      </div>
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn ancho" type="submit" id="btn-entrar">Entrar</button>
+      <button class="enlace" type="button" id="btn-olvide">Olvidé mi contraseña</button>
+    </form>
+
+    <!-- Nueva contraseña (llega desde el mail de recuperación) -->
+    <form id="form-nueva" hidden>
+      <p>Elegí tu nueva contraseña.</p>
+      <div class="campo">
+        <label for="nueva">Nueva contraseña</label>
+        <input id="nueva" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <div class="campo">
+        <label for="nueva2">Repetila</label>
+        <input id="nueva2" type="password" minlength="8" autocomplete="new-password" required>
+      </div>
+      <button class="btn ancho" type="submit">Guardar contraseña</button>
+    </form>
   </main>
-  <script src="config.js"></script>
-  <script>
-    (async () => {
-      const el = document.getElementById('estado');
-      const { SUPABASE_URL: url, SUPABASE_ANON_KEY: key } = window.APP_CONFIG || {};
-      if (!url || url.includes('TU-PROYECTO')) {
-        el.innerHTML = '<span class="err">Falta completar frontend/config.js</span>'; return;
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="js/comun.js"></script>
+<script>
+(async () => {
+  const { sb, $, toast, mensajeError } = CC;
+  const msg = (texto, tipo = 'error') => { const el = $('#mensaje'); el.textContent = texto; el.className = 'aviso-caja ' + tipo; el.hidden = !texto; };
+
+  if (new URLSearchParams(location.search).has('sin_acceso')) {
+    msg('Tu usuario no tiene acceso activo. Pedile al administrador que te habilite.', 'aviso');
+  }
+
+  // Llegada desde el mail de "recuperar contraseña"
+  let recuperando = false;
+  sb.auth.onAuthStateChange((evento) => {
+    if (evento === 'PASSWORD_RECOVERY') {
+      recuperando = true;
+      $('#form-login').hidden = true;
+      $('#form-nueva').hidden = false;
+      msg('');
+    }
+  });
+
+  // Si ya hay sesión, directo a la app
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && !location.hash.includes('type=recovery')) { location.replace('app.html'); return; }
+
+  $('#form-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btn-entrar');
+    btn.disabled = true; btn.textContent = 'Entrando…'; msg('');
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email: $('#email').value.trim(), password: $('#clave').value });
+      if (error) throw error;
+      const { data: perfil } = await sb.from('perfiles').select('rol, activo').eq('user_id', data.user.id).maybeSingle();
+      if (!perfil || !perfil.activo) {
+        await sb.auth.signOut();
+        throw new Error('Tu usuario no tiene acceso activo. Pedile al administrador que te habilite.');
       }
-      try {
-        const r = await fetch(url + '/auth/v1/health', { headers: { apikey: key } });
-        el.innerHTML = r.ok ? '<span class="ok">✓ Conectado a Supabase</span>'
-                            : '<span class="err">Supabase respondió ' + r.status + ' (revisá la anon key)</span>';
-      } catch (e) {
-        el.innerHTML = '<span class="err">No se pudo conectar (revisá la URL)</span>';
-      }
-    })();
-  </script>
+      location.replace('app.html');
+    } catch (err) {
+      msg(mensajeError(err));
+      btn.disabled = false; btn.textContent = 'Entrar';
+    }
+  });
+
+  $('#btn-olvide').addEventListener('click', async () => {
+    const email = $('#email').value.trim();
+    if (!email) { msg('Escribí tu mail arriba y volvé a tocar "Olvidé mi contraseña".', 'info'); $('#email').focus(); return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    if (error) msg(mensajeError(error));
+    else msg('Si el mail está registrado, te llegó un enlace para cambiar la contraseña.', 'ok');
+  });
+
+  $('#form-nueva').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if ($('#nueva').value !== $('#nueva2').value) { msg('Las contraseñas no coinciden.'); return; }
+    const { error } = await sb.auth.updateUser({ password: $('#nueva').value });
+    if (error) { msg(mensajeError(error)); return; }
+    toast('Contraseña actualizada', 'ok');
+    location.replace('app.html');
+  });
+})();
+</script>
 </body>
 </html>

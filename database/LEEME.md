@@ -17,12 +17,13 @@ Antes de cargar los datos reales: ejecutar `99_limpiar_datos.sql` (borra todo me
 
 | Archivo | Qué hace | ¿Re-ejecutable? |
 |---|---|---|
-| `00_INSTALAR_TODO.sql` | 01 + 02 + 03 + 04 juntos | No (instalación nueva) |
+| `00_INSTALAR_TODO.sql` | 01 + 02 + 03 + 04 + 06 juntos | No (instalación nueva) |
 | `01_estructura.sql` | Tablas, índices, triggers | No |
 | `02_funciones.sql` | Lógica de negocio | Sí, para actualizar |
 | `03_vistas.sql` | Consultas para pantallas | Sí |
 | `04_seguridad.sql` | Permisos por rol | Sí |
 | `05_datos_demo.sql` | Datos de prueba | Una vez |
+| `06_numeracion_correlativa.sql` | Pedidos, pagos y devoluciones sin saltos de número. **Si instalaste antes del 16/10, ejecutalo una vez** | Sí |
 | `99_limpiar_datos.sql` | Borra datos (no usuarios) | ⚠️ |
 | `pruebas/` | Pruebas automáticas en Postgres local. **No van en Supabase** | — |
 
